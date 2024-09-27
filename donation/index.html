@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Fundraisers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-around;
+            background-color: #007bff;
+            padding: 10px;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            font-size: 16px;
+        }
+        
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+
+        .content {
+            display: flex;
+            padding: 20px;
+        }
+
+        .left-section {
+            width: 60%;
+            padding-right: 20px;
+        }
+
+        .right-section {
+            margin-top: 100px;
+            width: 40%;
+        }
+
+        .fundraiser-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .fundraiser-item {
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .fundraiser-item:hover {
+            transform: translateY(-2px);
+        }
+
+        strong {
+            color: #007bff;
+        }
+
+        .no-fundraisers {
+            text-align: center;
+            color: #ff0000;
+        }
+
+        .loading {
+            text-align: center;
+            color: #007bff;
+        }
+
+        .fundraiser-image {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="./index.html">Home</a>
+        <a href="./search.html">Search</a>
+        <a href="./fundraiser.html">Fundraiser</a>
+    </div>
+    
+    <div class="content">
+        <div class="left-section">
+            <h1>Active Fundraisers</h1>
+            <ul class="fundraiser-list" id="fundraiser-list"></ul>
+        </div>
+        <div class="right-section">
+            <img src="https://img95.699pic.com/xsj/10/gg/6s.jpg%21/fh/300" alt="Fundraiser Image" class="fundraiser-image">
+         
+            <img src="https://pic.rmb.bdstatic.com/bjh/down/4c527a31d03eceeda05a76d10183f98a.jpeg" alt="Fundraiser Image" class="fundraiser-image">
+
+        </div>
+    </div>
+
+    <script>
+        async function fetchFundraisers() {
+            document.getElementById('fundraiser-list').innerHTML = '<li class="loading">Loading fundraisers...</li>';
+            try {
+                const response = await fetch('http://127.0.0.1:3001/search/getAllUser');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                displayFundraisers(data.data);
+            } catch (error) {
+                console.error('Error fetching fundraisers:', error);
+                document.getElementById('fundraiser-list').innerHTML = '<li class="no-fundraisers">Error loading fundraisers.</li>';
+            }
+        }
+
+        function displayFundraisers(fundraisers) {
+            const list = document.getElementById('fundraiser-list');
+            list.innerHTML = '';
+
+            if (fundraisers.length === 0) {
+                list.innerHTML = '<li class="no-fundraisers">No active fundraisers found.</li>';
+                return;
+            }
+
+            const categoryMapping = {
+                '1': 'Education',
+                '2': 'Environment',
+                '3': 'Arts'
+            };
+
+            fundraisers.forEach(fundraiser => {
+                const activeStatus = fundraiser.ACTIVE === '1' ? 'Active' : 'Inactive';
+                const categoryName = categoryMapping[fundraiser.CATEGORY_ID] || 'Unknown';
+
+                const listItem = document.createElement('li');
+                listItem.className = 'fundraiser-item';
+                listItem.innerHTML = `
+                    <strong>Organizer:</strong> ${fundraiser.ORGANIZER}<br>
+                    <strong>Caption:</strong> ${fundraiser.CAPTION}<br>
+                    <strong>City:</strong> ${fundraiser.CITY}<br>
+                    <strong>Target Funding:</strong> ${fundraiser.TARGET_FUNDING}<br>
+                    <strong>Current Funding:</strong> ${fundraiser.CURRENT_FUNDING}<br>
+                    <strong>Status:</strong> ${activeStatus}<br>
+                    <strong>Fundraiser ID:</strong> ${fundraiser.FUNDRAISER_ID}<br>
+                    <strong>Category:</strong> ${categoryName}<br>
+                `;
+                list.appendChild(listItem);
+            });
+        }
+
+        fetchFundraisers();
+    </script>
+
+</body>
+</html>
