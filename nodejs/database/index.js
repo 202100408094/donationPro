@@ -1,6 +1,6 @@
 const mysql = require("mysql");
 const db = mysql.createPool({
-    host: "127.0.0.1",
+    host: "localhost",
     user: "root",
     password: "xxx",
     database: "crowdfunding_db",
